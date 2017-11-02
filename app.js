@@ -3,22 +3,35 @@
 const redis = require('redis');
 
 const {
-	REDIS_HOST,
-	REDIS_PORT,
-	REDIS_AUTH,
-	REDIS_SUBSCRIBE,
-	REDIS_QUEUE
+    REDIS_FROM_HOST,
+    REDIS_FROM_PORT,
+    REDIS_FROM_AUTH,
+    REDIS_FROM_SUBSCRIBE,
+
+    REDIS_TO_HOST,
+    REDIS_TO_PORT,
+    REDIS_TO_AUTH,
+    REDIS_TO_QUEUE
 } = require('./config/config');
 
-const client = redis.createClient(REDIS_PORT, REDIS_HOST);
-if (REDIS_AUTH) {
-    client.auth(REDIS_AUTH);
+
+// connect
+
+const redisFrom = redis.createClient(REDIS_FROM_PORT, REDIS_FROM_HOST);
+if (REDIS_FROM_AUTH) {
+    redisFrom.auth(REDIS_FROM_AUTH);
+}
+
+const redisTo = redis.createClient(REDIS_TO_PORT, REDIS_TO_HOST);
+if (REDIS_TO_AUTH) {
+    redisTo.auth(REDIS_TO_AUTH);
 }
 
 
+// channel from subscribe to queue
 
-client.on('message', (channel, message) => {
-    console.log(`channel ${channel}: ${message}`);
+redisFrom.on('message', (channel, message) => {
+		redisTo.lpush(REDIS_TO_QUEUE, message);
 });
 
-client.subscribe(REDIS_SUBSCRIBE);
+redisFrom.subscribe(REDIS_FROM_SUBSCRIBE);
