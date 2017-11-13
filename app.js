@@ -43,7 +43,8 @@ if (REDIS_TO_AUTH) {
 
 redisFrom.on('message', (channel, message) => {
     console.log(`    ${message.substr(0,100)}`);
-	redisTo.lpush(REDIS_TO_QUEUE, message);
+	const response = redisTo.lpush(REDIS_TO_QUEUE, message);
+    console.log(`        ${response}`);
 });
 
 redisFrom.subscribe(REDIS_FROM_SUBSCRIBE);
